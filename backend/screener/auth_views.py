@@ -70,9 +70,11 @@ class RegisterView(APIView):
 
 
             except Exception as e:
-                logger.warning(f"Registration email delivery issue for {email}: {e}")
+                logger.error(f"Registration email delivery issue for {email}: {e}", exc_info=True)
+                return Response({'error': f'Failed to send OTP email: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
             return Response({'message': 'User registered successfully. Please check your email for the OTP.'})
+
 
         except IntegrityError as e:
             return Response({'error': 'Database integrity error during registration. User or email may already exist.'}, status=status.HTTP_400_BAD_REQUEST)

@@ -136,30 +136,26 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,
 }
 
-# Email Backend for OTP Delivery (SMTP with Fallback to Console in Dev)
+# Email Backend for OTP Delivery
 import ssl
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
 EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
 EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').lower() == 'true'
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'no-reply@quantengine.com')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'pvsaketh1@gmail.com')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '').replace(' ', '')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
 
 try:
     import certifi
-    context = ssl.create_default_context(cafile=certifi.where())
-    EMAIL_SSL_CONTEXT = context
-    ssl._create_default_https_context = lambda: context
+    EMAIL_SSL_CONTEXT = ssl.create_default_context(cafile=certifi.where())
 except Exception:
-    context = ssl._create_unverified_context()
-    EMAIL_SSL_CONTEXT = context
-    ssl._create_default_https_context = ssl._create_unverified_context
-
+    EMAIL_SSL_CONTEXT = ssl._create_unverified_context()
 
 # Fallback to Console Email Backend if SMTP credentials are not configured in local environment
 if not EMAIL_HOST_PASSWORD and EMAIL_BACKEND == 'django.core.mail.backends.smtp.EmailBackend':
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 
 
 
