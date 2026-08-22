@@ -144,6 +144,17 @@ python manage.py test
 
 ---
 
+## 👤 Candidate & Developer Contact Information
+
+- **Name**: PV Sairam Saketh
+- **Email**: pvsairamsaketh@gmail.com
+- **Phone**: +91 9359587816
+- **Position Applied**: AI/ML Engineer (Quantitative Programming)
+- **Assignment**: SSG Infotech Technical Assignment 1
+
+---
+
 ## 📄 License & Attribution
 Developed by **PV Sairam Saketh** for **SSG Infotech Technical Assignment 1**.  
 Distributed under the MIT License.
+
