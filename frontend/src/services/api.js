@@ -1,6 +1,12 @@
 import { safeLocalStorage } from '../utils/safeFormats';
 
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const defaultBackend = (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app'))
+  ? 'https://quantengine-backend.onrender.com'
+  : 'http://localhost:8000';
+
+export const API_BASE_URL = import.meta.env.VITE_API_URL || defaultBackend;
+
+
 
 /**
  * Resilient API client for making backend REST requests with automatic error normalization,
