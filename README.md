@@ -20,6 +20,64 @@ Built specifically for **SSG Infotech Technical Assignment 1 (AI/ML Engineer - Q
 
 ---
 
+## 📖 End-User Application Guide
+
+### Step 1: User Account Registration & Real-Time Email OTP
+1. Open the live web app at [https://angelone-mocha.vercel.app](https://angelone-mocha.vercel.app).
+2. Click **Sign Up** on the authentication card.
+3. Fill in your **Username**, **Email Address**, and **Password**.
+4. Click **Create Account**. Your account will be created in an inactive staging state.
+5. Check your email inbox for a 6-digit verification OTP sent directly from **`pvsaketh1@gmail.com`**.
+6. Enter the 6-digit OTP code on the verification screen to activate your account and automatically log in.
+
+---
+
+### Step 2: Navigating the Live Stock Screener Dashboard
+1. Once logged in, you will arrive at the **Live Stock Screener Dashboard**.
+2. **Live Data Streaming**: Stock prices, market depth, and indicators update automatically every 1.5 seconds without full page reloads.
+3. **Custom Filters**: Click **Filter Parameters** to customize:
+   - **Min/Max LTP**: Default is set to **₹30.00 – ₹500.00**.
+   - **Min Bid/Ask Depth**: Default is set to **10,00,000 (10 Lakhs)**.
+4. **Table Columns Breakdown**:
+   - **Symbol & Company**: NSE Ticker (e.g. `TATAMOTORS`, `SBIN`, `RELIANCE`).
+   - **LTP & Change**: Last Traded Price with color-coded percentage change.
+   - **SMMA(20) & SMMA(120)**: Real-time smoothed moving averages.
+   - **Market Depth**: Live Bid Price, Bid Qty, Ask Price, Ask Qty.
+   - **Exchange Traded Quantity (ETQ)**: Total traded volume over last 5m, 20m, and 60m.
+   - **Average Price**: Volume-weighted average price over 20m and 60m windows.
+
+---
+
+### Step 3: Viewing AI/ML Signal Analysis & Crossover Rationale
+1. Click on any stock row in the dashboard table or open the **AI Signal Panel**.
+2. **SMMA Crossover Detection**:
+   - **BUY Signal**: Triggered when SMMA(20) crosses above SMMA(120).
+   - **SELL Signal**: Triggered when SMMA(20) crosses below SMMA(120).
+3. **Quantitative ML Recommendation**:
+   - **`ACCEPT`**: Green badge indicating high probability of trade profitability based on LTQ volume surge ($LTQ_{2m} / LTQ_{5m} > 1.8x$).
+   - **`AVOID`**: Red badge indicating high probability of signal failure/whipsaw.
+4. **AI Confidence Score & Rationale**: View the exact model confidence percentage (e.g., `88.5%`) and a plain-text quantitative breakdown explaining why the trade should be executed or rejected.
+
+---
+
+### Step 4: Running Strategy Backtest Simulations
+1. Click **Backtest Engine** in the top navigation bar.
+2. Select your desired NSE stock symbols (e.g., `TATAMOTORS`, `INFY`) and enter initial capital (e.g. `₹1,00,000`).
+3. Click **Run Backtest**.
+4. **Performance Comparison**:
+   - **Raw Strategy Win Rate**: Standard SMMA crossover performance without AI filtering.
+   - **AI-Filtered Win Rate**: Enhanced win rate achieved by filtering out false crossover signals using the LTQ Machine Learning classifier.
+5. **Timeline Chart**: Review cumulative equity curve growth, total PnL ($\text{Sell LTP} - \text{Buy LTP}$), and list of trade execution timestamps.
+
+---
+
+### Step 5: Using Vision AI & Voice Copilot
+1. Click **Vision AI Scanner** to upload chart screenshots (PNG/JPEG) for automated technical analysis.
+2. Click the floating **AI Assistant** icon (bottom right) to ask market questions in 5 languages (English, Hindi, Telugu, Tamil, Marathi).
+3. Experience monospaced dark IDE code snippet blocks with 1-click code copying and live voice speech synthesis.
+
+---
+
 ## 📊 SSG Infotech Assignment 1 Compliance Matrix
 
 | Requirement # | Feature Requirement | System Implementation | Verification Status |
@@ -34,84 +92,6 @@ Built specifically for **SSG Infotech Technical Assignment 1 (AI/ML Engineer - Q
 | **8** | **AI/ML Model & LTQ Ratio** | Quantitative classifier using $LTQ_{2m} / LTQ_{5m}$ surge ratio, confidence %, & explanation. | **100% SATISFIED** |
 | **9** | **Trading & Backtest Logic** | Crossover exit rules, PnL calculation ($\text{Sell LTP} - \text{Buy LTP}$), win rate analysis. | **100% SATISFIED** |
 | **10** | **Security & Deliverables** | Safe JWT, SMTP OTP delivery via `pvsaketh1@gmail.com`, OWASP security headers, DoS rate limiting. | **100% SATISFIED** |
-
----
-
-## 🏗️ System Architecture & Data Flow
-
-```mermaid
-flowchart TD
-    subgraph Market_Data_Layer["Market Data Engine (Django)"]
-        NSE[NSE Market Tick Feeder] --> Engine[StockMarketEngine]
-        Engine --> Ind[Indicator Engine: SMMA20 & SMMA120]
-        Engine --> Depth[Market Depth & ETQ Calculator]
-    end
-
-    subgraph Quantitative_ML["AI/ML Signal Classification Layer"]
-        Depth --> LTQ[LTQ Ratio Calculator: 2m vs 5m]
-        Ind --> Crossover[SMMA Crossover Signal Detector]
-        Crossover --> ML[QuantMLClassifier: Random Forest / Rules]
-        LTQ --> ML
-        ML --> Decision{Accept or Avoid?}
-        Decision -->|Accept| Rec[Signal Recommendation + Confidence % + Rationale]
-        Decision -->|Avoid| Rec
-    end
-
-    subgraph API_Services["REST & Auth Gateway"]
-        Rec --> API[DRF REST Endpoints & Security Middleware]
-        SMTP[SMTP Gateway: pvsaketh1@gmail.com] <--> Auth[Auth Views & Email OTP Engine]
-    end
-
-    subgraph Client_Layer["Frontend Application (React + Vite)"]
-        API --> Dash[Live Dashboard Table]
-        API --> Chart[Interactive Backtest Visualizer]
-        API --> Copilot[Multimodal Vision AI Copilot]
-    end
-```
-
----
-
-## ⚙️ Step-by-Step Implementation Breakdown
-
-### Step 1: Stock Screening & Liquidity Filtering
-Implemented in `backend/screener/market_engine.py`:
-```python
-# Universe Screening Rules
-LTP_MIN = 30.0
-LTP_MAX = 500.0
-MIN_BID_QTY = 1_000_000
-MIN_ASK_QTY = 1_000_000
-```
-- Continuously scans active NSE instruments.
-- Filters out illiquid symbols, retaining only stocks meeting ₹30–₹500 LTP and >10 Lakh Bid/Ask depth.
-
-### Step 2: Technical Indicators & SMMA Crossover Detection
-Implemented in `backend/screener/indicators.py`:
-$$SMMA_t = \frac{SMMA_{t-1} \times (N-1) + Price_t}{N}$$
-- **Buy Signal**: Generated when SMMA(20) crosses above SMMA(120).
-- **Sell Signal**: Generated when SMMA(20) crosses below SMMA(120).
-
-### Step 3: Last Traded Quantity (LTQ) & ETQ Metrics
-Implemented in `backend/screener/market_engine.py`:
-- Tracks micro-second trade execution streams.
-- Computes Exchange Traded Quantity ($ETQ_{5m}$, $ETQ_{20m}$, $ETQ_{60m}$).
-- Calculates volume-weighted average LTP ($VWAP_{20m}$, $VWAP_{60m}$).
-
-### Step 4: Quantitative AI/ML Classifier Model
-Implemented in `backend/screener/ml_model.py`:
-- Features engineered:
-  1. **LTQ Ratio**: $\frac{\text{Avg LTQ (2 mins)}}{\text{Avg LTQ (5 mins)}}$
-  2. **Bid/Ask Imbalance**: $\frac{\text{Bid Quantity}}{\text{Ask Quantity}}$
-  3. **SMMA Slope Angle**: $\Delta SMMA(20)$ momentum.
-  4. **VWAP Deviation**: Distance between LTP and $VWAP_{20m}$.
-- Output: Predicts `ACCEPT` or `AVOID` for every crossover with confidence percentage and detailed trade rationale.
-
-### Step 5: Production Security & Email OTP Architecture
-Implemented in `backend/screener/auth_views.py` & `security_middleware.py`:
-- **Account Staging**: New user registrations are created as inactive (`is_active = False`).
-- **OTP Generation**: Cryptographically secure 6-digit numeric OTPs generated with 10-minute expiration.
-- **SMTP Email Dispatch**: Dispatches OTPs directly to user email addresses via `pvsaketh1@gmail.com` using TLS and CA certificate verification (`certifi`).
-- **DoS & DDoS Protection**: Token Bucket Rate Limiting middleware enforcing 60 req/10s per IP and 5 auth attempts/minute.
 
 ---
 
@@ -161,18 +141,6 @@ Run backend unit tests and security penetration suite:
 cd backend
 python manage.py test
 ```
-
-**Test Suite Coverage**:
-- `test_smma_series_calculation`: Indicator accuracy.
-- `test_ai_classifier_prediction`: ML model signal filtering.
-- `test_screener_filtering`: LTP & Liquidity bounds.
-- `test_run_strategy_backtest`: Quantitative backtest engine.
-- `test_01_dos_burst_rate_limiting`: DoS rate limit verification.
-- `test_02_auth_brute_force_rate_limiting`: Auth brute-force protection.
-- `test_03_production_security_headers`: OWASP headers check.
-- `test_04_sql_injection_resilience`: SQLi payload inoculation.
-- `test_05_xss_payload_sanitization`: XSS string sanitization.
-- `test_06_codebase_exfiltration_guardrail`: AI Copilot security guardrail.
 
 ---
 
