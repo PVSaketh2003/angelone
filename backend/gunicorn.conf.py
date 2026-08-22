@@ -1,11 +1,11 @@
 import os
-import multiprocessing
 
-# Production Gunicorn WSGI Configuration reading dynamic PORT from environment
+# Production Gunicorn Configuration optimized for 512MB RAM Cloud Instances
 port = os.environ.get("PORT", "8000")
 bind = f"0.0.0.0:{port}"
-workers = 2
-worker_class = "sync"
+workers = 1
+threads = 4
+worker_class = "gthread"
 timeout = 120
 keepalive = 5
 errorlog = "-"

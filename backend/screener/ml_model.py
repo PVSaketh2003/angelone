@@ -64,22 +64,13 @@ class SMMASignalClassifier:
         y_train, y_test = labels[:split], labels[split:]
 
         # Run GridSearchCV for optimal hyperparameter tuning
-        param_grid = {
-            'learning_rate': [0.05, 0.1],
-            'max_depth': [3, 5],
-            'n_estimators': [100, 150]
-        }
-        grid_search = GridSearchCV(
-            GradientBoostingClassifier(random_state=42),
-            param_grid,
-            cv=3,
-            scoring='roc_auc',
-            n_jobs=-1
-        )
-        grid_search.fit(X_train, y_train)
+        # Lightweight, high-performance GradientBoostingClassifier fit
+        clf = GradientBoostingClassifier(learning_rate=0.1, max_depth=3, n_estimators=50, random_state=42)
+        clf.fit(X_train, y_train)
         
-        self.model = grid_search.best_estimator_
-        best_params = grid_search.best_params_
+        self.model = clf
+        best_params = {'learning_rate': 0.1, 'max_depth': 3, 'n_estimators': 50}
+
 
         y_pred = self.model.predict(X_test)
         y_prob = self.model.predict_proba(X_test)[:, 1]
