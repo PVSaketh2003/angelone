@@ -1,10 +1,12 @@
 import { safeLocalStorage } from '../utils/safeFormats';
 
-const defaultBackend = (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app'))
+const defaultBackend = (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1')
   ? 'https://quantengine-backend.onrender.com'
   : 'http://localhost:8000';
 
 export const API_BASE_URL = import.meta.env.VITE_API_URL || defaultBackend;
+
+
 
 
 
